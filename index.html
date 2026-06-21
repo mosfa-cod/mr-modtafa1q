@@ -665,14 +665,14 @@ body.light .song-line{background:rgba(255,255,255,.6);}
 
 <div class="bottom-bar"><span>🌟 تعلّم · العب · تميّز 🌟</span></div>
 </div><!-- .app -->     <!--      <!-- نظام     <!-- نظام جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية -->
-    <script type="module">
+       <script type="module">
         import { initializeApp } from "https://gstatic.com";
         import { getDatabase, ref, get, child } from "https://gstatic.com";
 
         const firebaseConfig = {
             apiKey: "AIzaSyChKVZV2MX9EPuje0U5niCB00DknRs2yaA",
             authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebaseio.com",
+            databaseURL: "https://salma-and-youssef-default-rtdb.firebaseio.com/",
             projectId: "salma-and-youssef",
             storageBucket: "salma-and-youssef.firebasestorage.app",
             messagingSenderId: "522789153495",
@@ -690,7 +690,6 @@ body.light .song-line{background:rgba(255,255,255,.6);}
                 if (snapshot.exists()) {
                     const liveData = snapshot.val();
                     
-                    // التعديل الحاسم: قراءة أول عنصر داخل مصفوفة المحادثات مباشرة
                     const firstDialogue = Array.isArray(liveData) ? liveData[0] : liveData;
 
                     if (firstDialogue && firstDialogue.english_text) {
@@ -712,13 +711,11 @@ body.light .song-line{background:rgba(255,255,255,.6);}
                             if (foundEn && foundAr) break;
                         }
 
-                        // إضاءة كارت سلمى لتبدأ الكلام فوراً
                         const salmaChar = document.getElementById("cS") || document.querySelector("[id*='cS']") || document.querySelector(".char");
                         if (salmaChar) {
                             salmaChar.classList.remove("idle");
                             salmaChar.classList.add("active");
-                        }
-                    }
+                        
                     console.log("تم التحديث الديناميكي بنجاح باهر!");
                 }
             } catch (error) {
