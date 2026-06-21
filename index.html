@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -713,19 +713,19 @@ body.light .song-line{background:rgba(255,255,255,.6);}
                         }
 
                         const salmaChar = document.getElementById("cS") || document.querySelector("[id*='cS']") || document.querySelector(".char");
-                        if (salmaChar) {
-                            salmaChar.classList.remove("idle");
-                            salmaChar.classList.add("active");
-                        
-                    console.log("تم التحديث الديناميكي بنجاح باهر!");
+                if (salmaChar) {
+                    salmaChar.classList.remove("idle");
+                    salmaChar.classList.add("active");
                 }
-            } catch (error) {
-                console.error("Firebase Realtime Error:", error);
+                console.log("تم التحديث الديناميكي بنجاح باهر!");
             }
         }
-
-        window.addEventListener("DOMContentLoaded", startAppConnection);
-    </script>
+    } catch (error) {
+        console.error("Firebase Realtime Error:", error);
+    }
+  }
+  window.addEventListener("DOMContentLoaded", startAppConnection);
+  </script>
 
 </body>
 </html>
