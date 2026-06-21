@@ -689,8 +689,9 @@ body.light .song-line{background:rgba(255,255,255,.6);}
 
                 if (snapshot.exists()) {
                     const liveData = snapshot.val();
-                    
-                    const firstDialogue = Array.isArray(liveData) ? liveData[0] : liveData;
+                              const firstDialogue = liveData["0"] || liveData;
+
+
 
                     if (firstDialogue && firstDialogue.english_text) {
                         const allElements = document.getElementsByTagName("*");
