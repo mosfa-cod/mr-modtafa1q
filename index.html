@@ -104,43 +104,30 @@ body.light .card{background:linear-gradient(160deg,rgba(255,255,255,.9) 0%,rgba(
             <div id="app-title" class="content-title">تحميل التطبيق...</div>
             <div id="app-description" class="content-text">يرجى الانتظار، جاري الاتصال بالخادم الآمن.</div>
         </div>
-    </div>
-     <!-- نظام جلب البيانات السحري والمباشر المتصل بـ Firestore العام الخاص بك -->
+    </div>    <!-- نظام جلب البيانات السحري والمباشر المتصل بـ Firestore العام الخاص بك -->
     <script>
-        // استخدام الرابط المباشر للـ JSON المفتوح لتخطي حظر المتصفحات تماماً
-        const url = "https://googleapis.com";
-
-        async function loadEducationalData() {
+        // دالة الاستقبال السحرية التي ستنفذها جوجل فوراً لتخطي حظر المتصفحات
+        function handleEducationalData(data) {
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("فشل الاتصال بالخادم");
-                
-                const data = await response.json();
-                
-                // قراءة حقل اسم المنتج من قاعدة بياناتك وتجربته داخل موقع الأطفال
                 if (data && data.fields && data.fields.name && data.fields.name.stringValue) {
                     const dbValue = data.fields.name.stringValue; 
                     
-                    // السحر هنا: نغير النقاط ونعرض رسالة نجاح الربط للأطفال فوراً
-                    if(document.getElementById("score-counter")) {
-                        document.getElementById("score-counter").innerText = "⚡ 150";
+                    // السحر هنا: نحدث عداد النقاط فوراً في الشاشة ليتغير إلى 150
+                    const scoreElement = document.getElementById("score-counter");
+                    if (scoreElement) {
+                        scoreElement.innerText = "150";
                     }
                     
-                    // يمكنك لاحقاً ربط نصوص الحوارات بـ dbValue هنا بسهولة
                     console.log("تم جلب البيانات الحية بنجاح من Firebase:", dbValue);
                 }
             } catch (error) {
-                console.error("Firebase Error:", error);
-                // في حال انقطاع السيرفر، يظل التطبيق يعمل بالقيم الافتراضية الرائعة للأطفال
-                if(document.getElementById("score-counter")) {
-                    document.getElementById("score-counter").innerText = "⚡ 4";
-                }
+                console.error("معالجة البيانات فشلت:", error);
             }
         }
-
-        // تشغيل نظام الربط الديناميكي بمجرد فتح التطبيق
-        window.addEventListener("DOMContentLoaded", loadEducationalData);
     </script>
+
+    <!-- استدعاء الرابط كملف سكريبت خارجي مع دالة callback لتخطي الـ CORS تماماً -->
+    <script src="https://googleapis.com"></script>
 
 </body>
 </html>
