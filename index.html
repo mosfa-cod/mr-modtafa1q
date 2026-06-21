@@ -104,27 +104,28 @@ body.light .card{background:linear-gradient(160deg,rgba(255,255,255,.9) 0%,rgba(
             <div id="app-title" class="content-title">تحميل التطبيق...</div>
             <div id="app-description" class="content-text">يرجى الانتظار، جاري الاتصال بالخادم الآمن.</div>
         </div>
-    </div>    <!-- نظام جلب البيانات السحري والمباشر المتصل بـ Firestore العام الخاص بك -->
+    </div>    <!-- نظام جلب البيانات السحري و     <!-- نظام جلب البيانات المباشر المتصل بـ Firestore العام الخاص بك -->
     <script>
-        // دالة الاستقبال السحرية التي ستنفذها جوجل فوراً لتخطي حظر المتصفحات
+        // دالة الاستقبال السحرية لتحديث العداد تلقائياً
         function handleEducationalData(data) {
             try {
-                if (data && data.fields && data.fields.name && data.fields.name.stringValue) {
-                    const dbValue = data.fields.name.stringValue; 
-                    
-                    // السحر هنا: نحدث عداد النقاط فوراً في الشاشة ليتغير إلى 150
-                    const scoreElement = document.getElementById("score-counter");
-                    if (scoreElement) {
-                        scoreElement.innerText = "150";
+                // الكود يبحث عن أي عنصر في الصفحة مكتوب داخله الرقم 4 ليغيره إلى 150
+                const allElements = document.getElementsByTagName("*");
+                for (let i = 0; i < allElements.length; i++) {
+                    if (allElements[i].children.length === 0 && allElements[i].innerText.trim() === "4") {
+                        allElements[i].innerText = "150";
+                        break; // التوقف فور العثور على الرقم وتحديثه
                     }
-                    
-                    console.log("تم جلب البيانات الحية بنجاح من Firebase:", dbValue);
                 }
+                console.log("تمت العملية بنجاح!");
             } catch (error) {
-                console.error("معالجة البيانات فشلت:", error);
+                console.error("خطأ:", error);
             }
         }
     </script>
+
+    <!-- استدعاء الرابط كملف سكريبت خارجي مع دالة callback لتخطي الـ CORS تماماً -->
+    <script src="https://googleapis.com"></script>
 
     <!-- استدعاء الرابط كملف سكريبت خارجي مع دالة callback لتخطي الـ CORS تماماً -->
     <script src="https://googleapis.com"></script>
