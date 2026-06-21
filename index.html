@@ -664,7 +664,7 @@ body.light .song-line{background:rgba(255,255,255,.6);}
 </div><!-- .card -->
 
 <div class="bottom-bar"><span>🌟 تعلّم · العب · تميّز 🌟</span></div>
-</div><!-- .app -->     <!-- نظام جلب البيانات الحية المتصل بـ Realtime Database الخاص بكِ -->
+</div><!-- .app -->     <!--     <!-- نظام جلب البيانات الحية المباشر المتوافق مع دوالكِ الأصلية -->
     <script type="module">
         import { initializeApp } from "https://gstatic.com";
         import { getDatabase, ref, get, child } from "https://gstatic.com";
@@ -672,7 +672,7 @@ body.light .song-line{background:rgba(255,255,255,.6);}
         const firebaseConfig = {
             apiKey: "AIzaSyChKVZV2MX9EPuje0U5niCB00DknRs2yaA",
             authDomain: "://firebaseapp.com",
-            databaseURL: "https://salma-and-youssef-default-rtdb.firebaseio.com",
+            databaseURL: "https://firebaseio.com",
             projectId: "salma-and-youssef",
             storageBucket: "salma-and-youssef.firebasestorage.app",
             messagingSenderId: "522789153495",
@@ -682,28 +682,42 @@ body.light .song-line{background:rgba(255,255,255,.6);}
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        async function fetchLiveDialogues() {
+        async function startAppConnection() {
             try {
                 const dbRef = ref(db);
+                // جلب مصفوفة الحوارات من السيرفر الحي
                 const snapshot = await get(child(dbRef, "dialogues"));
 
                 if (snapshot.exists()) {
-                    window.dialogues = snapshot.val(); 
-                    window.currentIndex = 0;
+                    const liveData = snapshot.val();
                     
-                    if (typeof window.renderDialogue === "function") {
-                        window.renderDialogue();
-                    } else if (typeof renderDialogue === "function") {
-                        renderDialogue();
+                    // السحر هنا: نبحث عن دالة التحديث الأصلية في ملفك ونمرر لها البيانات مباشرة
+                    const updateUI = window.renderDialogue || window.showDialogue || (typeof renderDialogue !== "undefined" ? renderDialogue : null);
+                    
+                    if (typeof updateUI === "function") {
+                        // إرسال البيانات الحية لواجهتك الفخمة لتحديث نصوص الأطفال فوراً
+                        if (window.dialogues) window.dialogues = liveData;
+                        updateUI(liveData);
+                    } else {
+                        // حل احتياطي فوري لتحديث النصوص مباشرة داخل الفقاعات في حال تعذر الوصول للدالة العليا
+                        const txtEn = document.getElementById("text-english") || document.querySelector(".txt-en");
+                        const txtAr = document.getElementById("text-arabic") || document.querySelector(".txt-ar");
+                        if (txtEn && liveData[0]) txtEn.innerText = liveData[0].english_text;
+                        if (txtAr && liveData[0]) txtAr.innerText = liveData[0].arabic_text;
+                        
+                        // تفعيل الشخصية المتحدثة الأولى تلقائياً (سلمى)
+                        const salmaChar = document.getElementById("cS") || document.querySelector("#cS");
+                        if (salmaChar) salmaChar.classList.add("active");
                     }
-                    console.log("تم تحديث الحوارات الحية من السيرفر بنجاح!");
+                    console.log("تم بث الحوارات الحية لصفحة الأطفال بنجاح باهر!");
                 }
             } catch (error) {
                 console.error("Firebase Realtime Error:", error);
             }
         }
 
-        window.addEventListener("DOMContentLoaded", fetchLiveDialogues);
+        // تشغيل نظام البث المباشر فوراً مع تحميل واجهة الصفحة
+        window.addEventListener("DOMContentLoaded", startAppConnection);
     </script>
 
 </body>
