@@ -1,50 +1,4 @@
- <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>سلمى ويوسف</title>
-
-<!-- ضع CSS الكبير كما هو بدون تغيير -->
-<style>
-/* (اترك CSS كما هو عندك) */
-</style>
-
-</head>
-
-<body>
-
-<div class="bg-layer" id="bgLayer"></div>
-<canvas id="bgCanvas"></canvas>
-<div class="toast" id="toast"></div>
-
-<div class="app">
-
-  <!-- CARD -->
-  <div class="card" id="mainCard">
-
-    <!-- ══ DIALOGUE PANEL ══ -->
-    <div class="panel show" id="p0">
-
-      <div id="loading">جارٍ التحميل...</div>
-
-      <div class="dlg">
-        <p class="en-txt" id="enTxt" dir="ltr">Loading...</p>
-        <p class="ar-txt" id="arTxt">جارٍ التحميل...</p>
-      </div>
-
-      <div class="ctrl">
-        <button onclick="prev()">◀ السابق</button>
-        <button onclick="next()">التالي ▶</button>
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-<script type="module">
+ <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
@@ -61,151 +15,98 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let data = [];
-let index = 0;
+let lessons = [];
+let currentLessonIndex = 0;
+let currentDialogueIndex = 0;
 
-function hideLoading() {
-  document.getElementById("loading")?.style && (document.getElementById("loading").style.display="none");
+/* =======================
+   تحميل كل الدروس
+======================= */
+async function start() {
+  try {
+    console.log("Loading Firebase...");
+
+    const snap = await get(child(ref(db), "lessons"));
+
+    if (!snap.exists()) {
+      console.log("No data found");
+      return;
+    }
+
+    const data = snap.val();
+
+    lessons = Object.keys(data).map(key => ({
+      id: key,
+      ...data[key]
+    }));
+
+    console.log("Lessons loaded:", lessons);
+
+    loadLesson(0);
+
+  } catch (err) {
+    console.error("Firebase error:", err);
+  }
 }
 
-function render() {
-  const d = data[index];
+/* =======================
+   تحميل درس معين
+======================= */
+function loadLesson(index) {
+  currentLessonIndex = index;
+  currentDialogueIndex = 0;
+  renderDialogue();
+}
+
+/* =======================
+   عرض الحوار
+======================= */
+function renderDialogue() {
+  const lesson = lessons[currentLessonIndex];
+  if (!lesson) return;
+
+  const dialogues = Object.values(lesson.dialogues || {});
+  const d = dialogues[currentDialogueIndex];
+
   if (!d) return;
 
   document.getElementById("enTxt").textContent = d.english_text || "";
   document.getElementById("arTxt").textContent = d.arabic_text || "";
 }
 
-async function start() {
-  try {
-    const dbRef = ref(db);
-    const snap = await get(child(dbRef, "dialogues"));
-
-    if (!snap.exists()) {
-      hideLoading();
-      return;
-    }
-
-    data = Object.values(snap.val());
-
-    index = 0;
-    render();
-    hideLoading();
-
-  } catch (e) {
-    console.error(e);
-    hideLoading();
-  }
-}
-
+/* =======================
+   NEXT
+======================= */
 window.next = function () {
-  if (index < data.length - 1) {
-    index++;
-    render();
+  const lesson = lessons[currentLessonIndex];
+  const dialogues = Object.values(lesson.dialogues || {});
+
+  if (currentDialogueIndex < dialogues.length - 1) {
+    currentDialogueIndex++;
+    renderDialogue();
+  } else {
+    if (currentLessonIndex < lessons.length - 1) {
+      loadLesson(currentLessonIndex + 1);
+    } else {
+      alert("🎉 انتهيت من كل الدروس!");
+    }
   }
-}
-
-window.prev = function () {
-  if (index > 0) {
-    index--;
-    render();
-  }
-}
-
-start();
-</script>
-
-</body>
-</html>
-   <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  get,
-  child
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyChKVZV2MX9EPuje0U5niCB00DknRs2yaA",
-  authDomain: "salma-and-youssef.firebaseapp.com",
-  databaseURL: "https://salma-and-youssef-default-rtdb.firebaseio.com",
-  projectId: "salma-and-youssef",
-  storageBucket: "salma-and-youssef.firebasestorage.app",
-  messagingSenderId: "522789153495",
-  appId: "1:522789153495:web:dc365ecccf8d16d1f7de92"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-let dialogues = [];
-let index = 0;
-
-function hideLoading() {
-  const el = document.getElementById("loading");
-  if (el) el.style.display = "none";
-}
-
-function render() {
-  const data = dialogues[index];
-  if (!data) return;
-
-  const en = document.getElementById("enTxt");
-  const ar = document.getElementById("arTxt");
-
-  if (en) en.textContent = data.english_text || "";
-  if (ar) ar.textContent = data.arabic_text || "";
-}
-
-async function start() {
-  try {
-    console.log("Loading Firebase...");
-
-    const dbRef = ref(db);
-    const snap = await get(child(dbRef, "dialogues"));
-
-    if (!snap.exists()) {
-      console.log("No data found");
-      hideLoading();
-      return;
-    }
-
-    dialogues = Object.values(snap.val());
-
-    index = 0;
-    render();
-
-    hideLoading();
-
-    console.log("Loaded successfully");
-
-  } catch (error) {
-    console.error("Firebase Error:", error);
-    hideLoading();
+/* =======================
+   PREV
+======================= */
+window.prev = function () {
+  if (currentDialogueIndex > 0) {
+    currentDialogueIndex--;
+    renderDialogue();
+  } else if (currentLessonIndex > 0) {
+    loadLesson(currentLessonIndex - 1);
   }
-}
+};
 
-function next() {
-  if (index < dialogues.length - 1) {
-    index++;
-    render();
-  }
-}
-
-function prev() {
-  if (index > 0) {
-    index--;
-    render();
-  }
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  start();
-
-  document.getElementById("nextBtn")?.addEventListener("click", next);
-  document.getElementById("prevBtn")?.addEventListener("click", prev);
-});
+/* =======================
+   تشغيل
+======================= */
+start();
 </script>
-</body>
-</html>
