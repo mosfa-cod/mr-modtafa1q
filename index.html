@@ -662,10 +662,18 @@ body.light .song-line{background:rgba(255,255,255,.6);}
   </div>
 
 </div><!-- .card -->
+   <button id="prevBtn">السابق</button>
+<button id="nextBtn">التالي</button>
+
+<div id="enTxt"></div>
+<div id="arTxt"></div>
+
+<div id="cS" class="idle"></div>
 
 <div class="bottom-bar"><span>🌟 تعلّم · العب · تميّز 🌟</span></div>
-</div><!-- .app -->     <!--      <!-- نظام     <!-- نظام جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية -->
-      <script type="module">
+</div><!-- .app -->     <!--      <!-- نظام     <!-- نظا
+   جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية -->
+ <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getDatabase,
@@ -687,9 +695,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+let dialogues = [];
+let currentIndex = 0;
+
+// عرض الحوار الحالي
+function renderDialogue() {
+  const data = dialogues[currentIndex];
+  if (!data) return;
+
+  const enElement = document.getElementById("enTxt");
+  const arElement = document.getElementById("arTxt");
+
+  if (enElement) enElement.textContent = data.english_text || "";
+  if (arElement) arElement.textContent = data.arabic_text || "";
+
+  console.log(`عرض الحوار رقم: ${currentIndex}`);
+}
+
+// تحميل البيانات من Firebase
 async function startAppConnection() {
   try {
-
     const dbRef = ref(db);
     const snapshot = await get(child(dbRef, "dialogues"));
 
@@ -700,41 +725,53 @@ async function startAppConnection() {
 
     const liveData = snapshot.val();
 
-    const firstDialogue =
-      liveData["0"] ||
-      Object.values(liveData)[0];
+    // تحويل البيانات إلى مصفوفة مرتبة
+    dialogues = Object.values(liveData);
 
-    if (!firstDialogue) {
-      console.log("لم يتم العثور على بيانات حوار");
+    if (dialogues.length === 0) {
+      console.log("لا يوجد حوارات");
       return;
     }
 
-    const enElement = document.getElementById("enTxt");
-    const arElement = document.getElementById("arTxt");
-
-    if (enElement && firstDialogue.english_text) {
-      enElement.textContent = firstDialogue.english_text;
-    }
-
-    if (arElement && firstDialogue.arabic_text) {
-      arElement.textContent = firstDialogue.arabic_text;
-    }
+    currentIndex = 0;
+    renderDialogue();
 
     const salmaChar = document.getElementById("cS");
-
     if (salmaChar) {
       salmaChar.classList.remove("idle");
       salmaChar.classList.add("active");
     }
 
-    console.log("تم تحميل البيانات من Firebase بنجاح");
+    console.log("تم تحميل كل الحوارات بنجاح");
 
   } catch (error) {
     console.error("Firebase Error:", error);
   }
 }
 
-window.addEventListener("DOMContentLoaded", startAppConnection);
+// التالي
+function nextDialogue() {
+  if (currentIndex < dialogues.length - 1) {
+    currentIndex++;
+    renderDialogue();
+  }
+}
+
+// السابق
+function prevDialogue() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderDialogue();
+  }
+}
+
+// ربط الأزرار
+window.addEventListener("DOMContentLoaded", () => {
+  startAppConnection();
+
+  document.getElementById("nextBtn")?.addEventListener("click", nextDialogue);
+  document.getElementById("prevBtn")?.addEventListener("click", prevDialogue);
+});
 </script>
 
 </body>
