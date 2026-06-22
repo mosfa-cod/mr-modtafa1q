@@ -672,7 +672,8 @@ body.light .song-line{background:rgba(255,255,255,.6);}
 
 <div class="bottom-bar"><span>🌟 تعلّم · العب · تميّز 🌟</span></div>
 </div><!-- .app -->     <!--      <!-- نظام     <!-- نظا
-   جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية --> <script type="module">
+   جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية - 
+   <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getDatabase,
@@ -695,47 +696,45 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let dialogues = [];
-let currentIndex = 0;
+let index = 0;
 
 function hideLoading() {
   const el = document.getElementById("loading");
   if (el) el.style.display = "none";
 }
 
-function renderDialogue() {
-  const data = dialogues[currentIndex];
-
+function render() {
+  const data = dialogues[index];
   if (!data) return;
 
   const en = document.getElementById("enTxt");
   const ar = document.getElementById("arTxt");
 
-  if (en) en.textContent = data.english_text ?? "";
-  if (ar) ar.textContent = data.arabic_text ?? "";
+  if (en) en.textContent = data.english_text || "";
+  if (ar) ar.textContent = data.arabic_text || "";
 }
 
-async function startAppConnection() {
+async function start() {
   try {
     console.log("Loading Firebase...");
 
     const dbRef = ref(db);
-    const snapshot = await get(child(dbRef, "dialogues"));
+    const snap = await get(child(dbRef, "dialogues"));
 
-    if (!snapshot.exists()) {
+    if (!snap.exists()) {
       console.log("No data found");
       hideLoading();
       return;
     }
 
-    const liveData = snapshot.val();
-    dialogues = Object.values(liveData);
+    dialogues = Object.values(snap.val());
 
-    currentIndex = 0;
-    renderDialogue();
+    index = 0;
+    render();
 
     hideLoading();
 
-    console.log("App loaded successfully");
+    console.log("Loaded successfully");
 
   } catch (error) {
     console.error("Firebase Error:", error);
@@ -743,25 +742,25 @@ async function startAppConnection() {
   }
 }
 
-function nextDialogue() {
-  if (currentIndex < dialogues.length - 1) {
-    currentIndex++;
-    renderDialogue();
+function next() {
+  if (index < dialogues.length - 1) {
+    index++;
+    render();
   }
 }
 
-function prevDialogue() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    renderDialogue();
+function prev() {
+  if (index > 0) {
+    index--;
+    render();
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  startAppConnection();
+  start();
 
-  document.getElementById("nextBtn")?.addEventListener("click", nextDialogue);
-  document.getElementById("prevBtn")?.addEventListener("click", prevDialogue);
+  document.getElementById("nextBtn")?.addEventListener("click", next);
+  document.getElementById("prevBtn")?.addEventListener("click", prev);
 });
 </script>
 </body>
