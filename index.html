@@ -697,82 +697,52 @@ const db = getDatabase(app);
 let dialogues = [];
 let currentIndex = 0;
 
-// دالة ذكية لإخفاء شاشة التحميل بأي شكل كانت
 function hideLoading() {
-  // 1. البحث عن العنصر بواسطة الـ ID
-  const loadingEl = document.getElementById("loading");
-  if (loadingEl) {
-    loadingEl.style.display = "none";
-    return;
-  }
-
-  // 2. حل احتياطي: إذا لم يكن لديه ID، نبحث في الصفحة عن أي عنصر يحتوي على نص التحميل لإخفائه
-  const allDivs = document.querySelectorAll("div, h1, h2, p");
-  allDivs.forEach(el => {
-    if (el.textContent.includes("جارٍ التحميل") || el.textContent.includes("Loading...")) {
-      el.style.display = "none";
-    }
-  });
+  const el = document.getElementById("loading");
+  if (el) el.style.display = "none";
 }
 
-// عرض الحوار الحالي
 function renderDialogue() {
   const data = dialogues[currentIndex];
+
   if (!data) return;
 
-  const enElement = document.getElementById("enTxt");
-  const arElement = document.getElementById("arTxt");
+  const en = document.getElementById("enTxt");
+  const ar = document.getElementById("arTxt");
 
-  if (enElement) enElement.textContent = data.english_text || "";
-  if (arElement) arElement.textContent = data.arabic_text || "";
-
-  console.log(`عرض الحوار رقم: ${currentIndex}`);
+  if (en) en.textContent = data.english_text ?? "";
+  if (ar) ar.textContent = data.arabic_text ?? "";
 }
 
-// تحميل البيانات من Firebase
 async function startAppConnection() {
   try {
+    console.log("Loading Firebase...");
+
     const dbRef = ref(db);
     const snapshot = await get(child(dbRef, "dialogues"));
 
     if (!snapshot.exists()) {
-      console.log("لا توجد بيانات داخل dialogues");
-      hideLoading(); // إخفاء التحميل حتى لو لم توجد بيانات
-      return;
-    }
-
-    const liveData = snapshot.val();
-
-    // تحويل البيانات إلى مصفوفة مرتبة
-    dialogues = Object.values(liveData);
-
-    if (dialogues.length === 0) {
-      console.log("لا يوجد حوارات");
+      console.log("No data found");
       hideLoading();
       return;
     }
 
+    const liveData = snapshot.val();
+    dialogues = Object.values(liveData);
+
     currentIndex = 0;
     renderDialogue();
 
-    // إخفاء شاشة التحميل فوراً بعد عرض البيانات بنجاح
     hideLoading();
 
-    const salmaChar = document.getElementById("cS");
-    if (salmaChar) {
-      salmaChar.classList.remove("idle");
-      salmaChar.classList.add("active");
-    }
-
-    console.log("تم تحميل كل الحوارات بنجاح");
+    console.log("App loaded successfully");
 
   } catch (error) {
     console.error("Firebase Error:", error);
-    hideLoading(); // إخفاء التحميل لعدم تجميد الشاشة في حال حدوث خطأ اتصال
+    hideLoading();
   }
 }
 
-// التالي
 function nextDialogue() {
   if (currentIndex < dialogues.length - 1) {
     currentIndex++;
@@ -780,7 +750,6 @@ function nextDialogue() {
   }
 }
 
-// السابق
 function prevDialogue() {
   if (currentIndex > 0) {
     currentIndex--;
@@ -788,7 +757,6 @@ function prevDialogue() {
   }
 }
 
-// ربط الأزرار
 window.addEventListener("DOMContentLoaded", () => {
   startAppConnection();
 
@@ -796,6 +764,5 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("prevBtn")?.addEventListener("click", prevDialogue);
 });
 </script>
-
 </body>
 </html>
