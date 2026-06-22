@@ -672,8 +672,7 @@ body.light .song-line{background:rgba(255,255,255,.6);}
 
 <div class="bottom-bar"><span>🌟 تعلّم · العب · تميّز 🌟</span></div>
 </div><!-- .app -->     <!--      <!-- نظام     <!-- نظا
-   جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية -->
- <script type="module">
+   جلب البيانات الحية المباشر والذكي المتوافق مع واجهتكِ الأصلية --> <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getDatabase,
@@ -698,6 +697,24 @@ const db = getDatabase(app);
 let dialogues = [];
 let currentIndex = 0;
 
+// دالة ذكية لإخفاء شاشة التحميل بأي شكل كانت
+function hideLoading() {
+  // 1. البحث عن العنصر بواسطة الـ ID
+  const loadingEl = document.getElementById("loading");
+  if (loadingEl) {
+    loadingEl.style.display = "none";
+    return;
+  }
+
+  // 2. حل احتياطي: إذا لم يكن لديه ID، نبحث في الصفحة عن أي عنصر يحتوي على نص التحميل لإخفائه
+  const allDivs = document.querySelectorAll("div, h1, h2, p");
+  allDivs.forEach(el => {
+    if (el.textContent.includes("جارٍ التحميل") || el.textContent.includes("Loading...")) {
+      el.style.display = "none";
+    }
+  });
+}
+
 // عرض الحوار الحالي
 function renderDialogue() {
   const data = dialogues[currentIndex];
@@ -720,6 +737,7 @@ async function startAppConnection() {
 
     if (!snapshot.exists()) {
       console.log("لا توجد بيانات داخل dialogues");
+      hideLoading(); // إخفاء التحميل حتى لو لم توجد بيانات
       return;
     }
 
@@ -730,11 +748,15 @@ async function startAppConnection() {
 
     if (dialogues.length === 0) {
       console.log("لا يوجد حوارات");
+      hideLoading();
       return;
     }
 
     currentIndex = 0;
     renderDialogue();
+
+    // إخفاء شاشة التحميل فوراً بعد عرض البيانات بنجاح
+    hideLoading();
 
     const salmaChar = document.getElementById("cS");
     if (salmaChar) {
@@ -746,6 +768,7 @@ async function startAppConnection() {
 
   } catch (error) {
     console.error("Firebase Error:", error);
+    hideLoading(); // إخفاء التحميل لعدم تجميد الشاشة في حال حدوث خطأ اتصال
   }
 }
 
