@@ -1,4 +1,52 @@
- <script type="module">
+ <!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سلمى ويوسف</title>
+
+<style>
+body{
+  font-family: Arial;
+  background:#0b0f1a;
+  color:#fff;
+  text-align:center;
+  padding:40px;
+}
+#loading{
+  color:#ffcc00;
+  font-weight:bold;
+}
+.card{
+  margin-top:20px;
+  padding:20px;
+  border-radius:15px;
+  background:#151a2c;
+}
+button{
+  margin:10px;
+  padding:10px 20px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="loading">⏳ جارٍ التحميل...</div>
+
+<div class="card">
+  <h2 id="enTxt">---</h2>
+  <p id="arTxt">---</p>
+</div>
+
+<button onclick="prev()">◀ السابق</button>
+<button onclick="next()">التالي ▶</button>
+
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
@@ -16,97 +64,76 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 let lessons = [];
-let currentLessonIndex = 0;
-let currentDialogueIndex = 0;
+let lessonIndex = 0;
+let dialogueIndex = 0;
 
-/* =======================
-   تحميل كل الدروس
-======================= */
-async function start() {
-  try {
+/* =========================
+   تحميل البيانات
+========================= */
+async function start(){
+  try{
     console.log("Loading Firebase...");
 
-    const snap = await get(child(ref(db), "lessons"));
+    const snap = await get(child(ref(db), "lessons/lesson1/dialogues"));
 
-    if (!snap.exists()) {
-      console.log("No data found");
+    if(!snap.exists()){
+      console.log("No data found ❌");
+      document.getElementById("loading").innerText = "لا توجد بيانات";
       return;
     }
 
-    const data = snap.val();
+    const data = Object.values(snap.val());
 
-    lessons = Object.keys(data).map(key => ({
-      id: key,
-      ...data[key]
-    }));
+    lessons = data;
 
-    console.log("Lessons loaded:", lessons);
+    document.getElementById("loading").style.display = "none";
 
-    loadLesson(0);
+    render();
 
-  } catch (err) {
-    console.error("Firebase error:", err);
+  }catch(err){
+    console.error("Firebase Error:", err);
   }
 }
 
-/* =======================
-   تحميل درس معين
-======================= */
-function loadLesson(index) {
-  currentLessonIndex = index;
-  currentDialogueIndex = 0;
-  renderDialogue();
+/* =========================
+   عرض البيانات
+========================= */
+function render(){
+  const item = lessons[dialogueIndex];
+  if(!item) return;
+
+  document.getElementById("enTxt").textContent = item.english_text;
+  document.getElementById("arTxt").textContent = item.arabic_text;
 }
 
-/* =======================
-   عرض الحوار
-======================= */
-function renderDialogue() {
-  const lesson = lessons[currentLessonIndex];
-  if (!lesson) return;
-
-  const dialogues = Object.values(lesson.dialogues || {});
-  const d = dialogues[currentDialogueIndex];
-
-  if (!d) return;
-
-  document.getElementById("enTxt").textContent = d.english_text || "";
-  document.getElementById("arTxt").textContent = d.arabic_text || "";
+/* =========================
+   التالي
+========================= */
+window.next = function(){
+  if(dialogueIndex < lessons.length - 1){
+    dialogueIndex++;
+    render();
+  }else{
+    alert("🎉 انتهت الدروس");
+  }
 }
 
-/* =======================
-   NEXT
-======================= */
-window.next = function () {
-  const lesson = lessons[currentLessonIndex];
-  const dialogues = Object.values(lesson.dialogues || {});
-
-  if (currentDialogueIndex < dialogues.length - 1) {
-    currentDialogueIndex++;
-    renderDialogue();
-  } else {
-    if (currentLessonIndex < lessons.length - 1) {
-      loadLesson(currentLessonIndex + 1);
-    } else {
-      alert("🎉 انتهيت من كل الدروس!");
-    }
+/* =========================
+   السابق
+========================= */
+window.prev = function(){
+  if(dialogueIndex > 0){
+    dialogueIndex--;
+    render();
   }
-};
+}
 
-/* =======================
-   PREV
-======================= */
-window.prev = function () {
-  if (currentDialogueIndex > 0) {
-    currentDialogueIndex--;
-    renderDialogue();
-  } else if (currentLessonIndex > 0) {
-    loadLesson(currentLessonIndex - 1);
-  }
-};
-
-/* =======================
+/* =========================
    تشغيل
-======================= */
+========================= */
 start();
+
 </script>
+
+</body>
+</html>
